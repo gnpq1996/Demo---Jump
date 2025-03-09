@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
-using Demo.Inputs;
+using Demo.InputManagers;
 
 namespace Demo.Player.Movement
 {
@@ -43,13 +43,13 @@ namespace Demo.Player.Movement
             if (context.started)
             {
                 //Debug.Log("Input: Jump");
-                trigger_jump.SetTrigger(Time.time);
+                trigger_jump.Activate();
                 input_jump = true;
             }
             else if (context.canceled)
             {
                 //Debug.Log("Input: Stop jumping");
-                trigger_stopJumping.SetTrigger(Time.time);
+                trigger_stopJumping.Activate();
                 input_jump = false;
             }
         }
@@ -90,15 +90,9 @@ namespace Demo.Player.Movement
                 return;
             }
 
-            if (isGrounded)
+            if (current_jumps < max_jumps)
             {
                 Debug.Log("Grounded jump");
-                Jump();
-                return;
-            }
-            else if (timeStamp_lastIsGrounded + trigger_jump.graceTime_coyoteTime > Time.fixedTime)
-            {
-                Debug.Log("Coyote time jump");
                 Jump();
                 return;
             }
@@ -106,14 +100,11 @@ namespace Demo.Player.Movement
 
         private void Jump()
         {
-            if (current_jumps < max_jumps)
-            {
-                current_jumps++;
-                Debug.Log("JUMP!: " + current_jumps);
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
-                rb.AddForceY(jump_force);
-                trigger_jump.ForceReset();
-            }
+            current_jumps++;
+            Debug.Log("JUMP!: " + current_jumps);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
+            rb.AddForceY(jump_force);
+            trigger_jump.Deactivate();
             timeStamp_lastIsGrounded = -100;
         }
 

@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
+using Demo.Inputs;
 
 namespace Demo.Player.Movement
 {
@@ -7,6 +9,13 @@ namespace Demo.Player.Movement
     {
         [SerializeField] private Vector2 inputDirection;
         public Rigidbody2D rb;
+
+        [Header("Inputs")]
+        public bool input_jump = false;
+
+        [Header("Triggers")]
+        public InputTrigger_Jump trigger_jump;
+        public InputTrigger trigger_stopJumping;
 
         [Header("Movement")]
         public float velocity = 10;
@@ -19,24 +28,14 @@ namespace Demo.Player.Movement
         public float groundCheckRadius = 0.2f;
         public float groundCheckHeight = 0.2f;
         public LayerMask groundLayer;
-
-        [Header("Inputs")]
-        public bool jump_input = false;
-        public bool jumpStop_input = false;
-
-        float jump_lastGround_time = -100;
-        float jump_input_time = -100;
-        float jump_stopForce = 0.5f;
+        public float timeStamp_lastIsGrounded = -100;
 
         [Header("Jump")]
         public int max_jumps = 1;
         public int current_jumps = 0;
-        [Min(0.1f)]
-        public float gracePeriod_beforeGround = 0.3f;
-        [Min(0.1f)]
-        public float gracePeriod_coyoteTime = 0.3f;
         public float jump_force = 10;
-        public float gravity_up = 10;
+        public float jump_stopForce = 0.5f;
+        public float gravity_normal = 10;
         public float gravity_down = 10;
 
         public void InputHandler_Jump(InputAction.CallbackContext context)
@@ -44,13 +43,14 @@ namespace Demo.Player.Movement
             if (context.started)
             {
                 //Debug.Log("Input: Jump");
-                jump_input_time = Time.time;
-                jump_input = true;
+                trigger_jump.SetTrigger(Time.time);
+                input_jump = true;
             }
             else if (context.canceled)
             {
                 //Debug.Log("Input: Stop jumping");
-                jumpStop_input = true;
+                trigger_stopJumping.SetTrigger(Time.time);
+                input_jump = false;
             }
         }
         public void InputHandler_Movement(InputAction.CallbackContext context)
@@ -61,26 +61,31 @@ namespace Demo.Player.Movement
         private void FixedUpdate()
         {
             IsGrounded();
-            Jump_Handler();
             Movement();
+            Jump_Handler();
+
+            Reset_Triggers();
+        }
+
+        void Reset_Triggers()
+        {
+            trigger_stopJumping.ResetTrigger();
+            trigger_jump.ResetTrigger();
         }
 
         private void Jump_Handler()
         {
-            if (jumpStop_input)
+            if (trigger_stopJumping.trigger)
             {
                 if (rb.linearVelocityY > 0.1f)
                 {
                     Debug.Log("Reduzing jump speed");
                     rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocityY * jump_stopForce);
                 }
-
-                jumpStop_input = false;
-                jump_input = false;
                 return;
             }
 
-            if (!jump_input)
+            if (!trigger_jump.trigger)
             {
                 return;
             }
@@ -91,15 +96,11 @@ namespace Demo.Player.Movement
                 Jump();
                 return;
             }
-            else if (jump_lastGround_time + gracePeriod_coyoteTime > Time.time)
+            else if (timeStamp_lastIsGrounded + trigger_jump.graceTime_coyoteTime > Time.fixedTime)
             {
                 Debug.Log("Coyote time jump");
                 Jump();
-            }
-            else if (jump_input_time + gracePeriod_beforeGround < Time.time)
-            {
-                Debug.Log("To late");
-                jump_input = false;
+                return;
             }
         }
 
@@ -111,23 +112,21 @@ namespace Demo.Player.Movement
                 Debug.Log("JUMP!: " + current_jumps);
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
                 rb.AddForceY(jump_force);
+                trigger_jump.ForceReset();
             }
-
-            jump_input = false;
-            jump_lastGround_time = -100;
+            timeStamp_lastIsGrounded = -100;
         }
 
         private void Movement()
         {
             if (rb.linearVelocityY < -0.01f)
             {
-                //Debug.Log("Gravity down");
                 rb.gravityScale = gravity_down;
             }
             else
             {
                 //Debug.Log("Gravity up");
-                rb.gravityScale = gravity_up;
+                rb.gravityScale = gravity_normal;
             }
 
             float targetVelocity = inputDirection.x * velocity;
@@ -142,13 +141,12 @@ namespace Demo.Player.Movement
 
             if (hitColliders != null)
             {
-                //if (isGrounded == false) 
+                rb.gravityScale = gravity_normal;
                 current_jumps = 0;
 
                 isGrounded = true;
 
-                jump_lastGround_time = Time.time;
-
+                timeStamp_lastIsGrounded = Time.time;
                 return;
             }
 

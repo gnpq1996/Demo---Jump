@@ -17,6 +17,7 @@ namespace Demo.Player.Movement
         public bool isGrounded = false;
         public Transform groundCheck;
         public float groundCheckRadius = 0.2f;
+        public float groundCheckHeight = 0.2f;
         public LayerMask groundLayer;
 
         [Header("Inputs")]
@@ -104,18 +105,16 @@ namespace Demo.Player.Movement
 
         private void Jump()
         {
-            if (current_jumps >= max_jumps)
+            if (current_jumps < max_jumps)
             {
-                jump_input = false;
-                jump_lastGround_time = -100;
-                return;
+                current_jumps++;
+                Debug.Log("JUMP!: " + current_jumps);
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
+                rb.AddForceY(jump_force);
             }
-            current_jumps++;
-            jump_lastGround_time = -100;
-            Debug.Log("JUMP!: " + current_jumps);
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
-            rb.AddForceY(jump_force);
+
             jump_input = false;
+            jump_lastGround_time = -100;
         }
 
         private void Movement()
@@ -139,27 +138,29 @@ namespace Demo.Player.Movement
         }
         private void IsGrounded()
         {
-            var hitColliders = Physics2D.OverlapBox(groundCheck.position, new Vector2(groundCheckRadius, 0.2f), 0, groundLayer);
+            var hitColliders = Physics2D.OverlapBox(groundCheck.position, new Vector2(groundCheckRadius, groundCheckHeight), 0, groundLayer);
 
             if (hitColliders != null)
             {
-                Debug.Log("Colisão com: " + hitColliders.name);
+                //if (isGrounded == false) 
+                current_jumps = 0;
+
+                isGrounded = true;
 
                 jump_lastGround_time = Time.time;
-                isGrounded = true;
-                current_jumps = 0;
+
+                return;
             }
-            else
-            {
-                isGrounded = false;
-            }
+
+            isGrounded = false;
+
         }
 
 
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawCube(groundCheck.position, new Vector2(groundCheckRadius, 0.2f));
+            Gizmos.DrawCube(groundCheck.position, new Vector2(groundCheckRadius, groundCheckHeight));
         }
     }
 }

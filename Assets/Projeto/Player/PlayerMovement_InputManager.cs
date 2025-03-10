@@ -5,7 +5,7 @@ namespace Demo.InputManagers
 {
     public class PlayerMovement_InputManager : InputManager
     {
-        [SerializeField] private Vector2 inputDirection;
+        [SerializeField] public Vector2 inputDirection;
 
         [Header("Inputs")]
         [field:SerializeField] public bool input_jump { get; private set; } = false;
@@ -14,7 +14,7 @@ namespace Demo.InputManagers
         [field: SerializeField] public InputTrigger_Jump trigger_jump { get; private set; }
         [field: SerializeField] public InputTrigger trigger_stopJumping { get; private set; }
 
-        private void Update()
+        private void LateUpdate()
         {
             Reset_Triggers();
         }
@@ -46,7 +46,8 @@ namespace Demo.InputManagers
             else if (context.canceled)
             {
                 //Debug.Log("Input: Stop jumping");
-                trigger_stopJumping.Deactivate();
+                trigger_jump.Deactivate();
+                trigger_stopJumping.Activate();
                 input_jump = false;
             }
         }

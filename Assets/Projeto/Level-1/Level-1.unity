@@ -550,6 +550,7 @@ GameObject:
   - component: {fileID: 208084789}
   - component: {fileID: 208084788}
   - component: {fileID: 208084787}
+  - component: {fileID: 208084793}
   m_Layer: 3
   m_Name: Player _03
   m_TagString: Untagged
@@ -580,7 +581,7 @@ MonoBehaviour:
   <trigger_stopJumping>k__BackingField:
     <trigger>k__BackingField: 0
     <timeStamp>k__BackingField: 0
-    <graceTime>k__BackingField: 0.3
+    <graceTime>k__BackingField: 0.01
 --- !u!70 &208084788
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -850,6 +851,40 @@ Transform:
   - {fileID: 1909766546}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &208084793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 208084786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f31893cd9df25499a4ff96971a28e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <inputManager>k__BackingField: {fileID: 208084787}
+  <rb>k__BackingField: {fileID: 208084789}
+  movementInfo:
+    <max_velocity>k__BackingField: 10
+    <aceleration>k__BackingField: 5
+    <desaceleration>k__BackingField: 8
+  gravity:
+    <normal>k__BackingField: 5
+    <jumping>k__BackingField: 5
+    <falling>k__BackingField: 8
+  jumpInfo:
+    <jumpForce>k__BackingField: 10
+    <jumpStopForce>k__BackingField: 0.5
+  groundCheck:
+    transform: {fileID: 1165927959}
+    isGrounded: 0
+    timeStamp_lastIsGrounded: -100
+    checkRadius: 0.78
+    checkHeight: 0.1
+    groundLayer:
+      serializedVersion: 2
+      m_Bits: 1
 --- !u!1 &265784637
 GameObject:
   m_ObjectHideFlags: 0

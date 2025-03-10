@@ -1,4 +1,5 @@
 using Demo.InputManagers;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,9 +11,10 @@ namespace Demo.StateMachines
         public State<PlayerMovement_StateMachine> currentState;
         [Header("Components")]
         [field: SerializeField] public Demo.InputManagers.PlayerMovement_InputManager inputManager { get; private set; }
-        [field:SerializeField] public Rigidbody2D rb { get; private set; }
+        [field: SerializeField] public Rigidbody2D rb { get; private set; }
 
-        [System.Serializable] public class Movement_Info 
+        [System.Serializable]
+        public class Movement_Info
         {
             [field: SerializeField] public float max_velocity { get; private set; }
             [field: SerializeField] public float aceleration { get; private set; }
@@ -21,7 +23,8 @@ namespace Demo.StateMachines
         public Movement_Info movementInfo;
 
 
-        [System.Serializable] public class Gravity_Info
+        [System.Serializable]
+        public class Gravity_Info
         {
             [field: SerializeField] public float normal { get; private set; } = 5;
             [field: SerializeField] public float jumping { get; private set; } = 5;
@@ -29,14 +32,16 @@ namespace Demo.StateMachines
         }
         public Gravity_Info gravity;
 
-        [System.Serializable] public class Jump_Info
+        [System.Serializable]
+        public class Jump_Info
         {
             [field: SerializeField] public float jumpForce { get; private set; } = 10;
-            [field: SerializeField] public float jumpStopForce { get; private set; } = 0.5f;
+            [field: SerializeField, Range(0,1)] public float jumpStopForce { get; private set; } = 0.5f;
         }
         public Jump_Info jumpInfo;
 
-        [System.Serializable] public class GroundCheck
+        [System.Serializable]
+        public class GroundCheck
         {
             public Transform transform;
             public bool isGrounded;
@@ -64,7 +69,7 @@ namespace Demo.StateMachines
         private void Awake()
         {
             if (rb == null) rb = GetComponent<Rigidbody2D>();
-           Set_State(new Idle_State(this));
+            Set_State(new Idle_State(this));
         }
 
         private void FixedUpdate()
@@ -128,10 +133,34 @@ namespace Demo.StateMachines
             Debug.Log("Tick: Idle");
             stateMachine.Movement_Free();
 
-            if (stateMachine.groundCheck.isGrounded && stateMachine.inputManager.trigger_jump.trigger)
+            if (stateMachine.inputManager.trigger_jump.trigger)
             {
-                stateMachine.inputManager.trigger_jump.Deactivate();
-                stateMachine.Set_State(new Jumping_State(stateMachine));
+                //if (stateMachine.groundCheck.isGrounded ||
+                //    stateMachine.inputManager.trigger_jump.graceTime_coyoteTime
+                //    +
+                //    stateMachine.inputManager.trigger_jump.timeStamp
+                //    >
+                //    Time.time)
+                //{
+                //    stateMachine.inputManager.trigger_jump.Deactivate();
+                //    stateMachine.Set_State(new Jumping_State(stateMachine));
+                //}
+                if (stateMachine.groundCheck.isGrounded)
+                {
+                    Debug.Log(ccolor.orange("Grounded jump"));
+                    stateMachine.inputManager.trigger_jump.Deactivate();
+                    stateMachine.Set_State(new Jumping_State(stateMachine));
+                }
+                else if (stateMachine.inputManager.trigger_jump.graceTime_coyoteTime
+                    +
+                    stateMachine.groundCheck.timeStamp_lastIsGrounded
+                    >
+                    Time.time)
+                {
+                    Debug.Log(ccolor.orange("Coyote time jump"));
+                    stateMachine.inputManager.trigger_jump.Deactivate();
+                    stateMachine.Set_State(new Jumping_State(stateMachine));
+                }
             }
 
         }

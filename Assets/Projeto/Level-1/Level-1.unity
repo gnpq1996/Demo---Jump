@@ -577,7 +577,7 @@ MonoBehaviour:
     <trigger>k__BackingField: 0
     <timeStamp>k__BackingField: 0
     <graceTime>k__BackingField: 0.3
-    <graceTime_coyoteTime>k__BackingField: 0.3
+    <graceTime_coyoteTime>k__BackingField: 0.1
   <trigger_stopJumping>k__BackingField:
     <trigger>k__BackingField: 0
     <timeStamp>k__BackingField: 0
@@ -874,8 +874,8 @@ MonoBehaviour:
     <jumping>k__BackingField: 5
     <falling>k__BackingField: 8
   jumpInfo:
-    <jumpForce>k__BackingField: 10
-    <jumpStopForce>k__BackingField: 0.5
+    <jumpForce>k__BackingField: 200
+    <jumpStopForce>k__BackingField: 1
   groundCheck:
     transform: {fileID: 1165927959}
     isGrounded: 0
